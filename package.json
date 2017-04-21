@@ -1,0 +1,10 @@
+{
+  "name": "wio-ttn-dynamo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Steve Dalton <steve@refactor.com.au>",
+  "license": "MIT",
+  "dependencies": {
+    "ttn": "^2.1.0"
+  }
+}
