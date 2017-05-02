@@ -5,6 +5,7 @@
   "author": "Steve Dalton <steve@refactor.com.au>",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.45.0",
     "ttn": "^2.1.0"
   }
 }

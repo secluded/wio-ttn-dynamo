@@ -1,6 +1,14 @@
-var ttn = require('ttn');
-var fs = require('fs');
+var ttn = require('ttn')
+var fs = require('fs')
+
+var AWS = require('aws-sdk')
+AWS.config.credentials = new AWS.SharedIniFileCredentials({profile: 'wio'})
+AWS.config.region = 'ap-southeast-2'
+
+
 var secrets = require('./secrets')
+// var dynamodb = new AWS.DynamoDB();
+var docClient = new AWS.DynamoDB.DocumentClient();
 
 var options = {
   protocol: 'mqtts',
@@ -31,6 +39,7 @@ client.on('device', null, 'down/scheduled', function(deviceId, data) {
 
 client.on('message', function(deviceId, message) {
   var buf = message.payload_raw.toString();
+
   var temp_int, humid_int, pressure_int, rain_count;
   var tokens = buf.split(',');
 
@@ -41,5 +50,25 @@ client.on('message', function(deviceId, message) {
   var pressure = pressure_int / 100
   var rainfall = rain_count * 0.28
 
-  console.info(deviceId, temperature, humidity, pressure, rainfall)
+  var params = {
+      TableName:'wio',
+      Item:{
+          "DeviceId": deviceId,
+          "Timestamp": new Date().getTime(),
+          "Temperature": temperature,
+          "Humidity": humidity,
+          "Pressure": pressure,
+          "Rainfall": rainfall,
+          "DeviceTimestamp": message.metadata.time
+      }
+  }
+
+  console.log("Adding a new item...")
+  docClient.put(params, function(err, data) {
+      if (err) {
+          console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2))
+      } else {
+          console.log("Added item:", JSON.stringify(data, null, 2))
+      }
+  })
 });
